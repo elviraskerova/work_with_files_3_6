@@ -2,9 +2,12 @@ import zipfile
 from os.path import basename
 from zipfile import ZipFile
 import os
-import glob
+from PyPDF2 import PdfReader
+from openpyxl.reader.excel import load_workbook
 
 path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files')
+path_resources = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'resources')
+my_zip_file = os.path.join(path_resources, 'info.zip')
 
 
  # создание зип
@@ -27,32 +30,31 @@ def test_create_archive():
 
     # Чтение и проверка pdf
 def test_read_pdf():
-    my_zipfile = ZipFile(path)
-    with zipfile.ZipFile(path) as zf:
-        r_pdf = my_zipfile.extract('PDF_file.pdf')
-        reader1 = PdfReader(r_pdf)
-        text = reader1.pages[0].extract_text()
+    with ZipFile(my_zip_file, 'r') as zf:
+        r_pdf = zf.extract('PDF_file.pdf')
+        reader = PdfReader(r_pdf)
+        text = reader.pages[0].extract_text()
         print(text)
-        assert 'Пример pdf' in text
+        assert 'Время выполнения' in text
         os.remove(r_pdf)
 
 
     # Чтение и проверка csv
 def test_read_csv():
-    my_zipfile = ZipFile(path)
-    text = str(my_zipfile.read('csv_file.csv'))
+    zip_file = ZipFile(my_zip_file)
+    text = str(zip_file.read('csv_file.csv'))
     print(text)
-    assert 'Hello World' in text
+    assert 'Da Man' in text
 
 
     # Чтение и проверка xlsx
 def test_read_xlsx():
-    my_zipfile = ZipFile(path)
-    workbook = my_zipfile.extract('xlsx_file.xlsx')
+    zip_file = ZipFile(my_zip_file)
+    workbook = zip_file.extract('xlsx_file.xlsx')
     xlsx_book = load_workbook(workbook)
     sheet = xlsx_book.active
     print(sheet.cell(row=1, column=1).value)
-    assert 'Desktop' in sheet.cell(row=1, column=1).value
+    assert 'www' in sheet.cell(row=1, column=1).value
     os.remove(workbook)
 
 
